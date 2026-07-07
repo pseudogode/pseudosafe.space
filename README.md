@@ -70,11 +70,19 @@ using a private key secret and pipes `scripts/startup.sh` to run there — which
 pulls latest, rebuilds images, restarts the stack, and bootstraps TLS on first
 run.
 
-Required repository secrets:
+Configure these under **Settings → Secrets and variables → Actions**.
+
+Only the SSH key is a **secret**:
 
 | Secret                 | Meaning                                   |
 | ---------------------- | ----------------------------------------- |
 | `VPS_SSH_PRIVATE_KEY`  | Private SSH key authorized on the VPS     |
+
+Everything else is a non-secret **variable** (note: variables are not masked in
+workflow logs):
+
+| Variable               | Meaning                                   |
+| ---------------------- | ----------------------------------------- |
 | `VPS_HOST`             | VPS hostname / IP                         |
 | `VPS_USER`             | SSH user                                  |
 | `APP_DIR`              | Deploy directory, e.g. `/opt/pseudosafe.space` |
