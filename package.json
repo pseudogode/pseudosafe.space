@@ -5,10 +5,7 @@
   "description": "A fun portal monorepo",
   "workspaces": [
     "packages/*",
-    "apps/client",
-    "apps/server",
-    "apps/bridge-server",
-    "apps/bridge-client"
+    "apps/*"
   ],
   "scripts": {
     "dev:client": "npm run dev -w apps/client",

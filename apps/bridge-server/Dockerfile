@@ -19,9 +19,11 @@ RUN npm run build -w apps/bridge-server
 FROM node:22-alpine
 WORKDIR /repo
 COPY package.json ./
+# @pseudosafe/shared is a workspace dep, so npm must see its manifest to resolve
+# the link locally (even with --omit=dev) — otherwise it hits the registry and
+# 404s. It's a type-only package with no runtime code, so package.json is enough.
+COPY packages/shared/package.json packages/shared/
 COPY apps/bridge-server/package.json apps/bridge-server/
-# @pseudosafe/shared is a devDependency (type-only, erased at build), so
-# --omit=dev correctly skips it; no shared code is needed at runtime.
 RUN npm install --omit=dev
 COPY --from=build /repo/apps/bridge-server/dist apps/bridge-server/dist
 WORKDIR /repo/apps/bridge-server
