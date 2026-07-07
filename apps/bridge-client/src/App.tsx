@@ -130,9 +130,6 @@ export default function App() {
     <main className={styles.app}>
       <h1>Bridge</h1>
       <p>Status: {connected ? 'connected' : 'disconnected'}</p>
-      <p>
-        <a href="/">&larr; back to portal</a>
-      </p>
 
       {error && (
         <p className={styles.error}>
