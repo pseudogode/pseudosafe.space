@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.*
+.DS_Store
+
+# letsencrypt / certbot data (mounted volumes on the VPS)
+certbot/conf/
+certbot/www/

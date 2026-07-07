@@ -1,0 +1,57 @@
+services:
+  client:
+    build: ./apps/client
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  server:
+    build: ./apps/server
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+    expose:
+      - "3001"
+
+  bridge-client:
+    build: ./apps/bridge-client
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  bridge-server:
+    build: ./apps/bridge-server
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+    expose:
+      - "3002"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - client
+      - server
+      - bridge-client
+      - bridge-server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # Reload nginx every 6h so renewed certs are picked up.
+    command: >
+      /bin/sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g 'daemon off;'"
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # Try to renew every 12h.
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
