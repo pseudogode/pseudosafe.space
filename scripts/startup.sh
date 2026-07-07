@@ -19,12 +19,17 @@ echo "### Updating source ..."
 git fetch --all
 git reset --hard "origin/$BRANCH"
 
-# 2. Build and start the stack.
+# 2. Ensure the certbot host dirs exist and are owned by this user BEFORE
+#    compose runs — otherwise the Docker daemon creates them as root and the
+#    init-letsencrypt.sh writes below fail with "Permission denied".
+mkdir -p certbot/conf certbot/www
+
+# 3. Build and start the stack.
 echo "### Building and starting containers ..."
 docker compose build
 docker compose up -d
 
-# 3. Bootstrap TLS certificate the first time (no cert on disk yet).
+# 4. Bootstrap TLS certificate the first time (no cert on disk yet).
 if [ ! -d "$APP_DIR/certbot/conf/live" ]; then
   echo "### No certificate found — running init-letsencrypt.sh ..."
   chmod +x scripts/init-letsencrypt.sh
