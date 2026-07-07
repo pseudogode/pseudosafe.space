@@ -19,12 +19,20 @@ export default function Play({ view, onPlayCard, readOnly = false }: PlayProps) 
   // Led suit of the current trick (first card played), if any.
   const ledSuit: Suit | undefined = currentTrick.length > 0 ? currentTrick[0].card.suit : undefined
 
-  const controllingOwnHand = !readOnly && view.you !== undefined && view.you === view.turn
+  const declarer = view.contract?.declarer
+  const youAreDummy = view.you !== undefined && view.you === view.dummy
+
+  // You play your own hand on your turn — unless you are the dummy, who never
+  // plays once the hand is down (the declarer plays it instead).
+  const controllingOwnHand =
+    !readOnly && view.you !== undefined && view.you === view.turn && !youAreDummy
+
+  // Bridge rule: the declarer plays the dummy's hand when it's the dummy's turn.
   const controllingDummy =
     !readOnly &&
+    declarer !== undefined &&
     view.dummy !== undefined &&
-    view.you !== undefined &&
-    view.you === view.dummy &&
+    view.you === declarer &&
     view.turn === view.dummy
 
   function canPlayFrom(hand: Card[], card: Card): boolean {
@@ -75,20 +83,28 @@ export default function Play({ view, onPlayCard, readOnly = false }: PlayProps) 
 
       <TablePreview view={view} />
 
-      <h3>Your hand{view.you ? ` (${view.you})` : ''}</h3>
-      {view.hand ? (
-        controllingOwnHand ? (
-          renderPlayableHand(view.hand)
-        ) : (
-          <p className={styles.hand}>{handText(view.hand)}</p>
-        )
-      ) : (
-        <p>(no hand)</p>
+      {/* The dummy's own hand IS the dummy shown below once it's down, so we
+          don't repeat it as "Your hand" for the dummy player. */}
+      {!(youAreDummy && view.dummyHand) && (
+        <>
+          <h3>Your hand{view.you ? ` (${view.you})` : ''}</h3>
+          {view.hand ? (
+            controllingOwnHand ? (
+              renderPlayableHand(view.hand)
+            ) : (
+              <p className={styles.hand}>{handText(view.hand)}</p>
+            )
+          ) : (
+            <p>(no hand)</p>
+          )}
+        </>
       )}
 
       {view.dummy && view.dummyHand && (
         <>
-          <h3>Dummy ({view.dummy})</h3>
+          <h3>
+            Dummy ({view.dummy}){controllingDummy ? ' — you play this hand' : ''}
+          </h3>
           {controllingDummy ? (
             renderPlayableHand(view.dummyHand)
           ) : (
