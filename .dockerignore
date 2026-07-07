@@ -1,0 +1,12 @@
+# Applies to the repo-root build context used by bridge-client and
+# bridge-server. Keep the context small and free of host-only artifacts.
+**/node_modules
+**/dist
+.git
+.github
+certbot
+nginx
+scripts
+*.log
+.DS_Store
+*.tsbuildinfo

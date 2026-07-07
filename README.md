@@ -7,18 +7,29 @@ real-time Bridge lobby.
 
 ```
 apps/
-  client/          React 19 + Vite portal (unstyled). Scratch text + button,
-                   and a card linking to the Bridge game.
-  server/          Express API for the portal (/api/*).
-  bridge-server/   Express + Socket.IO Bridge lobby (rooms, players, chat).
+  client/          React 19 + Vite + TypeScript portal (unstyled). Scratch text
+                   + button, and a card linking to the Bridge game.
+  server/          Express API for the portal (/api/*). TypeScript, compiles to dist/.
+  bridge-server/   Express + Socket.IO Bridge lobby. TypeScript, compiles to dist/.
   bridge-client/   React 19 + Vite + Socket.IO Bridge lobby UI (served /bridge/).
+packages/
+  shared/          Type-only package (@pseudosafe/shared): the Socket.IO event
+                   contracts shared by bridge-server and bridge-client so the
+                   two ends of the protocol can't drift. No runtime output —
+                   imports are `import type` and erased at build.
 nginx/             Reverse proxy config (TLS termination + routing).
 scripts/           init-letsencrypt.sh (first-time TLS), startup.sh (deploy).
 .github/workflows/ deploy.yml — SSH deploy to a VPS.
+tsconfig.base.json Canonical shared TS compiler options (each app's tsconfig
+                   mirrors these; not extended at build time so Docker builds
+                   stay self-contained).
 ```
 
-npm workspaces tie the apps together, but each `package.json` lists its full
-dependency set so Docker can build each app in isolation.
+The whole codebase is **TypeScript**. The two Vite apps type-check with
+`tsc -b` then bundle with Vite (`noEmit`); the two Node servers compile with
+`tsc` to `dist/` and run the compiled output. npm workspaces tie the apps
+together, but each `package.json` lists its full dependency set (including
+`typescript`) so Docker can build each app in isolation.
 
 ## Local development
 
@@ -28,6 +39,14 @@ npm run dev:server          # portal API      -> http://localhost:3001
 npm run dev:client          # portal          -> http://localhost:5173
 npm run dev:bridge-server   # bridge lobby API -> http://localhost:3002
 npm run dev:bridge-client   # bridge lobby UI  -> http://localhost:5174
+```
+
+Servers run under `tsx watch` in dev (no separate build step needed). To
+type-check and compile everything at once:
+
+```bash
+npm run build       # tsc -b + vite build for clients; tsc for servers
+npm run typecheck   # same, without producing bundles you keep
 ```
 
 For the bridge client in dev, point it at the local bridge server:
@@ -42,6 +61,11 @@ VITE_SOCKET_URL=http://localhost:3002 VITE_SOCKET_PATH=/socket.io npm run dev:br
 docker compose build
 docker compose up -d
 ```
+
+> `bridge-client` and `bridge-server` build from the **repo root** context (not
+> their own dir) so the `@pseudosafe/shared` workspace package is available to
+> the compiler; `client` and `server` still build from their own directories.
+> The root `.dockerignore` keeps that context lean.
 
 Routing through the nginx reverse proxy:
 

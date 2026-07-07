@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { io } from 'socket.io-client'
+import { io, type Socket } from 'socket.io-client'
+import type {
+  RoomSummary,
+  Player,
+  ChatMessage,
+  ServerToClientEvents,
+  ClientToServerEvents,
+} from '@pseudosafe/shared'
 
 // In production the bridge server sits behind the reverse proxy at the same
 // origin, reachable under the /bridge-api path. In dev, point at :3002.
@@ -7,7 +14,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || undefined // same-origin
 const SOCKET_PATH = import.meta.env.VITE_SOCKET_PATH || '/bridge-api/socket.io'
 
 export default function App() {
-  const socket = useMemo(
+  const socket = useMemo<Socket<ServerToClientEvents, ClientToServerEvents>>(
     () => io(SOCKET_URL, { path: SOCKET_PATH, autoConnect: false }),
     [],
   )
@@ -16,9 +23,9 @@ export default function App() {
   const [name, setName] = useState('')
   const [roomId, setRoomId] = useState('')
   const [joined, setJoined] = useState(false)
-  const [rooms, setRooms] = useState([])
-  const [players, setPlayers] = useState([])
-  const [messages, setMessages] = useState([])
+  const [rooms, setRooms] = useState<RoomSummary[]>([])
+  const [players, setPlayers] = useState<Player[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [chatText, setChatText] = useState('')
   const [error, setError] = useState('')
 
@@ -33,10 +40,12 @@ export default function App() {
     })
     socket.on('chat', (msg) => setMessages((m) => [...m, msg]))
     socket.on('errorMessage', (text) => setError(text))
-    return () => socket.disconnect()
+    return () => {
+      socket.disconnect()
+    }
   }, [socket])
 
-  function joinRoom(e) {
+  function joinRoom(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     socket.emit('joinRoom', { roomId: roomId.trim(), name: name.trim() })
@@ -49,7 +58,7 @@ export default function App() {
     setMessages([])
   }
 
-  function sendChat(e) {
+  function sendChat(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!chatText.trim()) return
     socket.emit('chat', { text: chatText.trim() })
@@ -71,13 +80,13 @@ export default function App() {
             <p>
               <label>
                 Name:{' '}
-                <input value={name} onChange={(e) => setName(e.target.value)} />
+                <input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
               </label>
             </p>
             <p>
               <label>
                 Room:{' '}
-                <input value={roomId} onChange={(e) => setRoomId(e.target.value)} />
+                <input value={roomId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRoomId(e.target.value)} />
               </label>
             </p>
             <button type="submit" disabled={!connected}>Join</button>
@@ -117,7 +126,7 @@ export default function App() {
             ))}
           </ul>
           <form onSubmit={sendChat}>
-            <input value={chatText} onChange={(e) => setChatText(e.target.value)} />
+            <input value={chatText} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChatText(e.target.value)} />
             <button type="submit">Send</button>
           </form>
         </section>

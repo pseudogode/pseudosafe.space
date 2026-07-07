@@ -14,7 +14,7 @@ export default function App() {
       const data = await res.json()
       setMessage(data.message)
     } catch (err) {
-      setMessage('error: ' + err.message)
+      setMessage('error: ' + (err instanceof Error ? err.message : String(err)))
     }
   }
 

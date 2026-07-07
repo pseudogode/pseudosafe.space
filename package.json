@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "A fun portal monorepo",
   "workspaces": [
+    "packages/*",
     "apps/client",
     "apps/server",
     "apps/bridge-server",
@@ -14,6 +15,7 @@
     "dev:server": "npm run dev -w apps/server",
     "dev:bridge-server": "npm run dev -w apps/bridge-server",
     "dev:bridge-client": "npm run dev -w apps/bridge-client",
-    "build": "npm run build -w apps/client && npm run build -w apps/bridge-client"
+    "build": "npm run build -w apps/client && npm run build -w apps/server && npm run build -w apps/bridge-client && npm run build -w apps/bridge-server",
+    "typecheck": "npm run build -w apps/client && npm run build -w apps/server && npm run build -w apps/bridge-client && npm run build -w apps/bridge-server"
   }
 }

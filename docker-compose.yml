@@ -14,13 +14,19 @@ services:
       - "3001"
 
   bridge-client:
-    build: ./apps/bridge-client
+    # Root context so the @pseudosafe/shared workspace package is in scope.
+    build:
+      context: .
+      dockerfile: apps/bridge-client/Dockerfile
     restart: unless-stopped
     expose:
       - "80"
 
   bridge-server:
-    build: ./apps/bridge-server
+    # Root context so the @pseudosafe/shared workspace package is in scope.
+    build:
+      context: .
+      dockerfile: apps/bridge-server/Dockerfile
     restart: unless-stopped
     environment:
       - PORT=3002
