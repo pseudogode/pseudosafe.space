@@ -349,21 +349,30 @@ io.on('connection', (socket: AppSocket) => {
       return
     }
     const me = room.players.get(socket.id)
-    // The socket must own the seat on turn. Note: the dummy's own socket plays
-    // the dummy's cards, and game.turn will be the dummy seat when it's dummy's
-    // turn — so this same ownership check covers that case.
-    if (!me?.seat || me.seat !== room.game.turn) {
+    const game = room.game
+    const turnSeat = game.turn
+    // Bridge rule: once the dummy's hand is down, the DECLARER plays both their
+    // own hand and the dummy's; the dummy is only a spectator. So when it's the
+    // dummy seat's turn, the socket allowed to act is the declarer's, not the
+    // dummy's. Every other seat plays its own cards.
+    const controllingSeat =
+      game.contract && game.dummy && turnSeat === game.dummy
+        ? game.contract.declarer
+        : turnSeat
+    if (!me?.seat || me.seat !== controllingSeat) {
       socket.emit('errorMessage', 'Not your turn to play.')
       emitGameViews(roomId, room)
       return
     }
-    if (!isPlayLegal(room.game, me.seat, card)) {
+    // The card is validated against (and played from) the seat on turn — i.e.
+    // the dummy's hand when the declarer is playing for the dummy.
+    if (!isPlayLegal(game, turnSeat, card)) {
       socket.emit('errorMessage', 'Illegal card.')
       emitGameViews(roomId, room)
       return
     }
 
-    room.game = applyPlay(room.game, card)
+    room.game = applyPlay(game, card)
     if (room.game.phase === 'FINISHED') {
       room.phase = 'FINISHED'
     }
