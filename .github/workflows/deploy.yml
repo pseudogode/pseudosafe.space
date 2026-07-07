@@ -4,12 +4,18 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment to deploy to
+        type: environment
+        required: true
+        default: prod
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Pull secrets/variables from the "prod" GitHub Environment.
-    environment: prod
+    # On workflow_dispatch, use the chosen Environment; on push, default to prod.
+    environment: ${{ github.event.inputs.environment || 'prod' }}
     # Only VPS_SSH_PRIVATE_KEY is a secret; the rest are non-secret Environment
     # variables (Settings > Environments > prod > Variables), surfaced here as
     # shell env vars. Defined at job level so the prod environment context is
