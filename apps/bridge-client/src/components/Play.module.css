@@ -1,0 +1,12 @@
+.hand {
+  font-family: monospace;
+}
+
+.suitGroup {
+  margin-right: 1em;
+}
+
+.trick {
+  list-style: none;
+  padding-left: 0;
+}

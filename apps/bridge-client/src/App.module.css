@@ -1,0 +1,9 @@
+.app {
+  max-width: 60em;
+  margin: 0 auto;
+  padding: 1em;
+}
+
+.error {
+  margin: 0.5em 0;
+}

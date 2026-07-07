@@ -1,0 +1,46 @@
+.table {
+  border: 1px solid;
+  padding: 1em;
+  display: inline-block;
+  margin-bottom: 1em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 0.5em;
+  text-align: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.seat {
+  border: 1px solid;
+  padding: 0.4em;
+  min-width: 10em;
+}
+
+.seatTurn {
+  border-width: 2px;
+}
+
+.hand {
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+.center {
+  min-width: 10em;
+}
+
+.bidding {
+  margin-top: 0.8em;
+}
+
+.auction th {
+  padding: 0 0.6em;
+}
+
+.auction td {
+  text-align: center;
+}
