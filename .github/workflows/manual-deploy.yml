@@ -1,0 +1,50 @@
+name: Manual Deploy
+
+# Manual-only. GitHub's workflow_dispatch UI shows a native branch dropdown
+# ("Use workflow from …") — that selected branch is github.ref_name, which we
+# deploy. No push trigger, no free-text branch input.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment to deploy to
+        type: environment
+        required: true
+        default: prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # Only VPS_SSH_PRIVATE_KEY is a secret; the rest are non-secret Environment
+    # variables, surfaced here as shell env vars at job level.
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      APP_DIR: ${{ vars.APP_DIR }}
+      REPO_URL: ${{ vars.REPO_URL }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
+    steps:
+      - name: Show target
+        run: echo "Deploying branch '${{ github.ref_name }}' to environment '${{ inputs.environment }}'"
+
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Run startup script on VPS
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" \
+            "APP_DIR='$APP_DIR' \
+             REPO_URL='$REPO_URL' \
+             BRANCH='${{ github.ref_name }}' \
+             DOMAIN='$DOMAIN' \
+             EMAIL='$LETSENCRYPT_EMAIL' \
+             bash -s" < scripts/startup.sh
