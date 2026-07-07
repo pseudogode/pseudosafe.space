@@ -5,20 +5,22 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Only the SSH private key is a secret. Everything else is a non-secret
-# repository variable (Settings > Secrets and variables > Actions > Variables),
-# exposed here as environment variables.
-env:
-  VPS_HOST: ${{ vars.VPS_HOST }}
-  VPS_USER: ${{ vars.VPS_USER }}
-  APP_DIR: ${{ vars.APP_DIR }}
-  REPO_URL: ${{ vars.REPO_URL }}
-  DOMAIN: ${{ vars.DOMAIN }}
-  LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Pull secrets/variables from the "prod" GitHub Environment.
+    environment: prod
+    # Only VPS_SSH_PRIVATE_KEY is a secret; the rest are non-secret Environment
+    # variables (Settings > Environments > prod > Variables), surfaced here as
+    # shell env vars. Defined at job level so the prod environment context is
+    # available when these expressions resolve.
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      APP_DIR: ${{ vars.APP_DIR }}
+      REPO_URL: ${{ vars.REPO_URL }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
