@@ -1,0 +1,17 @@
+.hand {
+  font-family: monospace;
+}
+
+.calls {
+  list-style: none;
+  padding-left: 0;
+}
+
+.controls {
+  margin-top: 1em;
+}
+
+.bidGrid button {
+  min-width: 3em;
+  margin: 0 0.15em;
+}
