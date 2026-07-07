@@ -6,7 +6,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-/opt/pseudosafe.space}"
 REPO_URL="${REPO_URL:-git@github.com:OWNER/pseudosafe.space.git}"
-BRANCH="${BRANCH:-main}"
+BRANCH="${BRANCH:-master}"
 
 # 1. Clone on first deploy, otherwise fetch latest.
 if [ ! -d "$APP_DIR/.git" ]; then

@@ -65,7 +65,7 @@ up renewed certs. Use `STAGING=1` to test against Let's Encrypt staging first.
 
 ## Deploying via GitHub Actions
 
-`.github/workflows/deploy.yml` runs on push to `main`. It SSHes into the VPS
+`.github/workflows/deploy.yml` runs on push to `master`. It SSHes into the VPS
 using a private key secret and pipes `scripts/startup.sh` to run there — which
 pulls latest, rebuilds images, restarts the stack, and bootstraps TLS on first
 run.

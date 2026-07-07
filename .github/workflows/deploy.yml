@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
     inputs:
       environment:
@@ -43,7 +43,7 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" \
             "APP_DIR='$APP_DIR' \
              REPO_URL='$REPO_URL' \
-             BRANCH='main' \
+             BRANCH='master' \
              DOMAIN='$DOMAIN' \
              EMAIL='$LETSENCRYPT_EMAIL' \
              bash -s" < scripts/startup.sh
